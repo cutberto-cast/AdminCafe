@@ -216,7 +216,12 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
     const hayDatosBancarios = config.banco || config.beneficiario || config.clabe;
 
     return (
-        <div className="animate-fade-in pb-8">
+        <div className="animate-fade-in pb-8 overflow-x-hidden">
+            {/* Meta viewport para prevenir zoom en móviles */}
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+            </head>
+
             {/* Encabezado */}
             <div className="flex items-center gap-4 mb-6 sticky top-0 bg-white/80 backdrop-blur-md py-3 z-10 -mx-4 px-4 border-b border-gray-100">
                 <button
@@ -233,7 +238,7 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
 
             {/* Resumen del pedido */}
             <div className="bg-white/60 backdrop-blur-xl rounded-2xl p-5 mb-5 shadow-sm border border-gray-100/80">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">
                     Resumen de tu orden
                 </h3>
                 <div className="space-y-3">
@@ -276,7 +281,7 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
             {/* Formulario */}
             <form onSubmit={handleEnviar} className="space-y-6">
                 <div className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-gray-100/80 space-y-4">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-2">
                         Datos de entrega
                     </h3>
 
@@ -291,7 +296,8 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                             value={datos.nombre_cliente}
                             onChange={handleChange}
                             placeholder="Ej: María García"
-                            className={`w-full px-4 py-3 bg-gray-50/50 rounded-xl border text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 transition-all focus:bg-white ${errores.nombre_cliente ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'}`}
+                            style={{ fontSize: '16px' }}
+                            className={`w-full px-4 py-3 bg-gray-50/50 rounded-xl border text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 transition-all focus:bg-white ${errores.nombre_cliente ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'}`}
                         />
                         {errores.nombre_cliente && <p className="text-red-500 text-[11px] mt-1.5 ml-1 font-medium">{errores.nombre_cliente}</p>}
                     </div>
@@ -307,7 +313,8 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                             value={datos.direccion}
                             onChange={handleChange}
                             placeholder="Calle, número, colonia..."
-                            className={`w-full px-4 py-3 bg-gray-50/50 rounded-xl border text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 transition-all focus:bg-white ${errores.direccion ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'}`}
+                            style={{ fontSize: '16px' }}
+                            className={`w-full px-4 py-3 bg-gray-50/50 rounded-xl border text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 transition-all focus:bg-white ${errores.direccion ? 'border-red-300 focus:ring-red-100' : 'border-gray-200 focus:border-gray-300 focus:ring-gray-100'}`}
                         />
                         {errores.direccion && <p className="text-red-500 text-[11px] mt-1.5 ml-1 font-medium">{errores.direccion}</p>}
                     </div>
@@ -323,14 +330,15 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                             value={datos.notas || ''}
                             onChange={handleChange}
                             placeholder="Ej: Tocar el timbre, fachada azul..."
-                            className="w-full px-4 py-3 bg-gray-50/50 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:border-gray-300 focus:ring-gray-100 transition-all focus:bg-white resize-none"
+                            style={{ fontSize: '16px' }}
+                            className="w-full px-4 py-3 bg-gray-50/50 rounded-xl border border-gray-200 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-4 focus:border-gray-300 focus:ring-gray-100 transition-all focus:bg-white resize-none"
                         />
                     </div>
                 </div>
 
-                {/* Forma de pago (Estilo SaaS Segmented Control) */}
+                {/* Forma de pago */}
                 <div className="bg-white/60 backdrop-blur-xl p-5 rounded-2xl shadow-sm border border-gray-100/80">
-                    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-400 mb-4">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500 mb-4">
                         Método de pago
                     </h3>
 
@@ -339,8 +347,8 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                             type="button"
                             onClick={() => setDatos((prev) => ({ ...prev, forma_pago: 'efectivo' }))}
                             className={`relative flex-1 py-2.5 px-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 z-10 ${datos.forma_pago === 'efectivo'
-                                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -352,8 +360,8 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                             type="button"
                             onClick={handleTransferenciaClick}
                             className={`relative flex-1 py-2.5 px-2 rounded-xl text-sm font-medium transition-all duration-300 flex items-center justify-center gap-2 z-10 ${datos.forma_pago === 'transferencia'
-                                    ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50'
-                                    : 'text-gray-500 hover:text-gray-700'
+                                ? 'bg-white text-gray-900 shadow-sm border border-gray-200/50'
+                                : 'text-gray-500 hover:text-gray-700'
                                 }`}
                         >
                             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -389,10 +397,11 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                                         {config.clabe}
                                     </p>
                                 </div>
-                                <div className={`flex-shrink-0 p-2.5 rounded-xl flex items-center gap-1.5 transition-all ${copiado === 'clabe' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
-                                    }`}>
-                                    {copiado === 'clabe' ? <CheckIcon /> : <CopyIcon />}
-                                    <span className="hidden sm:inline text-xs font-semibold">
+                                <div className="flex-shrink-0 flex items-center gap-1.5">
+                                    <div className={`p-1.5 rounded-lg transition-colors ${copiado === 'clabe' ? 'text-green-600' : 'text-gray-400 group-hover:text-gray-700'}`}>
+                                        {copiado === 'clabe' ? <CheckIcon /> : <CopyIcon />}
+                                    </div>
+                                    <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700 min-w-[50px]">
                                         {copiado === 'clabe' ? 'Copiado' : 'Copiar'}
                                     </span>
                                 </div>
@@ -410,8 +419,13 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Institución</p>
                                         <p className="text-sm font-medium text-gray-900">{config.banco}</p>
                                     </div>
-                                    <div className={`p-2 rounded-lg transition-colors ${copiado === 'banco' ? 'text-green-600 bg-green-50' : 'text-gray-400 group-hover:bg-gray-50 group-hover:text-gray-700'}`}>
-                                        {copiado === 'banco' ? <CheckIcon /> : <CopyIcon />}
+                                    <div className="flex items-center gap-1.5">
+                                        <div className={`p-1.5 rounded-lg transition-colors ${copiado === 'banco' ? 'text-green-600' : 'text-gray-400 group-hover:text-gray-700'}`}>
+                                            {copiado === 'banco' ? <CheckIcon /> : <CopyIcon />}
+                                        </div>
+                                        <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700 min-w-[50px]">
+                                            {copiado === 'banco' ? 'Copiado' : 'Copiar'}
+                                        </span>
                                     </div>
                                 </button>
                             )}
@@ -426,8 +440,13 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                                         <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Beneficiario</p>
                                         <p className="text-sm font-medium text-gray-900">{config.beneficiario}</p>
                                     </div>
-                                    <div className={`p-2 rounded-lg transition-colors ${copiado === 'beneficiario' ? 'text-green-600 bg-green-50' : 'text-gray-400 group-hover:bg-gray-50 group-hover:text-gray-700'}`}>
-                                        {copiado === 'beneficiario' ? <CheckIcon /> : <CopyIcon />}
+                                    <div className="flex items-center gap-1.5">
+                                        <div className={`p-1.5 rounded-lg transition-colors ${copiado === 'beneficiario' ? 'text-green-600' : 'text-gray-400 group-hover:text-gray-700'}`}>
+                                            {copiado === 'beneficiario' ? <CheckIcon /> : <CopyIcon />}
+                                        </div>
+                                        <span className="text-xs font-medium text-gray-500 group-hover:text-gray-700 min-w-[50px]">
+                                            {copiado === 'beneficiario' ? 'Copiado' : 'Copiar'}
+                                        </span>
                                     </div>
                                 </button>
                             )}
