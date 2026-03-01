@@ -304,8 +304,8 @@ export default function HomePage() {
                         );
                         if (productosSimplesCat.length === 0) return null;
 
-                        const mostrarVerMas = productosSimplesCat.length > 4;
-                        const productosAMostrar = productosSimplesCat.slice(0, 4);
+                        const mostrarVerMas = false;
+                        const productosAMostrar = productosSimplesCat;
 
                         return (
                           <section key={categoria.id} className="mb-6">
@@ -313,18 +313,6 @@ export default function HomePage() {
                               <h2 className="text-lg font-bold text-cafe-900">
                                 {categoria.nombre}
                               </h2>
-                              {mostrarVerMas && (
-                                <button
-                                  onClick={() => {
-                                    const macro = categorias.find(c => c.id === categoria.id)?.macro_categoria;
-                                    if (macro) setMacroActiva(macro);
-                                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                                  }}
-                                  className="text-sm font-semibold text-[var(--color-primario)] hover:underline"
-                                >
-                                  Ver más
-                                </button>
-                              )}
                             </div>
                             <div className="grid grid-cols-2 gap-3 sm:gap-4">
                               {productosAMostrar.map((producto) => (

@@ -25,13 +25,14 @@ export function ConfiguradorProducto({
     const [toppingsElegidos, setToppingsElegidos] = useState<Topping[]>([]);
     const [cantidad, setCantidad] = useState(1);
     const [errorVariante, setErrorVariante] = useState(false);
+    const [errorToppings, setErrorToppings] = useState(false);
 
     const precioUnitario = useMemo(() => {
         let base = 0;
         if (producto.tiene_variantes && varianteElegida) {
             base = varianteElegida.precio;
-        } else if (!producto.tiene_variantes && producto.precio) {
-            base = producto.precio;
+        } else if (!producto.tiene_variantes) {
+            base = producto.precio ?? 0;
         }
 
         const toppingsExtra = Math.max(0, toppingsElegidos.length - producto.toppings_gratis);
@@ -48,11 +49,17 @@ export function ConfiguradorProducto({
             if (existe) return prev.filter((t) => t.id !== topping.id);
             return [...prev, topping];
         });
+        setErrorToppings(false);
     };
 
     const handleConfirmar = () => {
         if (producto.tiene_variantes && !varianteElegida) {
             setErrorVariante(true);
+            return;
+        }
+
+        if (producto.acepta_toppings && toppingsElegidos.length === 0) {
+            setErrorToppings(true);
             return;
         }
 
@@ -68,6 +75,13 @@ export function ConfiguradorProducto({
     const variantes = grupo_variantes?.variantes
         ?.filter((v: Variante) => v.disponible)
         ?.sort((a: Variante, b: Variante) => a.orden - b.orden) ?? [];
+
+    const esSabores = [
+        'Crepa Dulce', 'Crepa Salada', 'Waffle', 'Marquesita'
+    ].includes(producto.nombre);
+
+    const labelSaborTopping = esSabores ? 'sabor' : 'topping';
+    const labelSaboresPlural = esSabores ? 'sabores' : 'toppings';
 
     return (
         <div
@@ -166,14 +180,36 @@ export function ConfiguradorProducto({
                         <div className="space-y-2.5">
                             <div>
                                 <h3 className="text-sm font-bold text-cafe-800 uppercase tracking-wide">
-                                    Elige tus toppings
+                                    {esSabores ? 'Elige tus sabores' : 'Elige tus toppings'}
                                 </h3>
                                 <p className="text-xs text-cafe-400">
                                     {producto.toppings_gratis > 0
-                                        ? `Incluye ${producto.toppings_gratis} gratis, extras +${formatearPrecio(producto.precio_topping_extra)} c/u`
-                                        : `Cada uno +${formatearPrecio(producto.precio_topping_extra)}`}
+                                        ? `Incluye ${producto.toppings_gratis} ${producto.toppings_gratis === 1 ? labelSaborTopping : labelSaboresPlural} — extra +${formatearPrecio(producto.precio_topping_extra)} c/u`
+                                        : `Cada ${labelSaborTopping} +${formatearPrecio(producto.precio_topping_extra)}`
+                                    }
+                                    <span className="text-red-400 ml-1">
+                                        · Mínimo 1 requerido
+                                    </span>
                                 </p>
                             </div>
+
+                            {toppingsElegidos.length > 0 && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-medium text-cafe-700 bg-cafe-50 border border-cafe-200 px-2.5 py-1 rounded-full">
+                                        {toppingsElegidos.length}{' '}
+                                        {toppingsElegidos.length === 1 ? labelSaborTopping : labelSaboresPlural}{' elegido'}
+                                        {toppingsElegidos.length !== 1 ? 's' : ''}
+                                    </span>
+
+                                    {toppingsElegidos.length > producto.toppings_gratis && (
+                                        <span className="text-xs font-medium text-amber-700 bg-amber-50 border border-amber-200 px-2.5 py-1 rounded-full">
+                                            +{formatearPrecio(
+                                                (toppingsElegidos.length - producto.toppings_gratis) * (producto.precio_topping_extra || 0)
+                                            )} extra
+                                        </span>
+                                    )}
+                                </div>
+                            )}
 
                             <div className="grid grid-cols-2 gap-2">
                                 {toppings_disponibles.map((topping) => {
@@ -206,6 +242,12 @@ export function ConfiguradorProducto({
                                     );
                                 })}
                             </div>
+
+                            {errorToppings && (
+                                <p className="text-red-500 text-xs font-medium animate-fade-in mt-1">
+                                    ⚠️ Por favor elige al menos un {labelSaborTopping}
+                                </p>
+                            )}
                         </div>
                     )}
                 </div>
