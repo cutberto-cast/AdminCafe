@@ -383,6 +383,19 @@ export default function HomePage() {
                 );
               })()}
             </section>
+
+            {/* Footer del menú con link a privacidad */}
+            <div className="text-center py-6 border-t border-gray-100 mt-4">
+              <p className="text-xs text-gray-400 mb-2">
+                © {new Date().getFullYear()} Cafecito · Tuxpanguillo, Veracruz
+              </p>
+              <a
+                href="/privacidad"
+                className="text-xs text-gray-400 hover:text-gray-600 underline underline-offset-2 transition-colors"
+              >
+                Aviso de Privacidad
+              </a>
+            </div>
           </div>
         )}
 
