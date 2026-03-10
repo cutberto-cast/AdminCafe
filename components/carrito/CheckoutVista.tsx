@@ -113,11 +113,26 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
         mensaje += `*🛒 DETALLE DEL PEDIDO:*\n`;
         itemsParam.forEach((item) => {
             const partes: string[] = [];
+
             if (item.variante_elegida) partes.push(item.variante_elegida.nombre);
+
             if (item.toppings_elegidos && item.toppings_elegidos.length > 0) {
                 partes.push(item.toppings_elegidos.map((t) => t.nombre).join(', '));
             }
+
+            // Ingredientes: "Con todo" o lista de removidos
+            const tieneIngredientes = item.producto.tiene_ingredientes === true;
+
+            if (tieneIngredientes) {
+                if (item.ingredientes_removidos && item.ingredientes_removidos.length > 0) {
+                    partes.push(`Sin: ${item.ingredientes_removidos.join(', ')}`);
+                } else {
+                    partes.push('Con todo');
+                }
+            }
+
             const detalle = partes.length > 0 ? ` — ${partes.join(' · ')}` : '';
+
             mensaje += `• ${item.cantidad}x ${item.producto.nombre}${detalle} — ${formatearPrecio(item.precio_final * item.cantidad)}\n`;
         });
 
@@ -261,6 +276,11 @@ export function CheckoutVista({ onVolver }: CheckoutVistaProps) {
                                                 {t.nombre}
                                             </span>
                                         ))}
+                                        {item.ingredientes_removidos && item.ingredientes_removidos.length > 0 && (
+                                            <span className="inline-flex text-[11px] px-2 py-0.5 rounded-md bg-red-50 text-red-400">
+                                                Sin: {item.ingredientes_removidos.join(', ')}
+                                            </span>
+                                        )}
                                     </div>
                                 )}
                             </div>

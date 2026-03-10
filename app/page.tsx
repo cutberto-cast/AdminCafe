@@ -13,9 +13,9 @@ import { CarritoVista } from '@/components/carrito/CarritoVista';
 import { CheckoutVista } from '@/components/carrito/CheckoutVista';
 import { createClient } from '@/lib/supabase/client';
 import { useCarrito } from '@/stores/carritoStore';
-import type { Producto, Categoria, Banner, Topping, CarritoItem, MacroCategoria } from '@/types';
+import type { Producto, Categoria, Banner, Topping, CarritoItem, MacroCategoria, Ingrediente } from '@/types';
 import { MACRO_CATEGORIAS_CONFIG } from '@/types';
-import type { GrupoConVariantes, ProductoConToppings } from '@/types/variantes';
+import type { GrupoConVariantes, ProductoConToppings, ProductoConIngredientes } from '@/types/variantes';
 
 type Vista = 'home' | 'carrito' | 'checkout';
 
@@ -49,13 +49,14 @@ export default function HomePage() {
   // Datos de variantes y toppings
   const [gruposVariantes, setGruposVariantes] = useState<GrupoConVariantes[]>([]);
   const [productoToppings, setProductoToppings] = useState<ProductoConToppings[]>([]);
+  const [productoIngredientes, setProductoIngredientes] = useState<ProductoConIngredientes[]>([]);
 
   const supabase = createClient();
   const agregarConfigurable = useCarrito((state) => state.agregarConfigurable);
 
   const cargarDatos = useCallback(async () => {
     setCargando(true);
-    const [resCat, resProd, resBan, resConf, resBanProd, resGruposVar, resProdTopp] = await Promise.all([
+    const [resCat, resProd, resBan, resConf, resBanProd, resGruposVar, resProdTopp, resProdIngr] = await Promise.all([
       supabase.from('categorias').select('*').order('orden'),
       supabase.from('productos').select('*').order('creado_en', { ascending: false }),
       supabase.from('banners').select('*').order('orden'),
@@ -63,6 +64,7 @@ export default function HomePage() {
       supabase.from('banner_productos').select('*'),
       supabase.from('grupos_variantes').select('*, variantes (*)').order('creado_en'),
       supabase.from('producto_toppings').select('*, toppings (*)'),
+      supabase.from('producto_ingredientes').select('*').order('orden'),
     ]);
 
     if (resCat.data) setCategorias(resCat.data);
@@ -79,6 +81,18 @@ export default function HomePage() {
     }
     if (resGruposVar.data) setGruposVariantes(resGruposVar.data as GrupoConVariantes[]);
     if (resProdTopp.data) setProductoToppings(resProdTopp.data as ProductoConToppings[]);
+    if (resProdIngr.data) {
+      const mapa: Record<string, Ingrediente[]> = {};
+      resProdIngr.data.forEach((row: Ingrediente) => {
+        if (!mapa[row.producto_id]) mapa[row.producto_id] = [];
+        mapa[row.producto_id]!.push(row);
+      });
+      const agrupados: ProductoConIngredientes[] = [];
+      Object.entries(mapa).forEach(([producto_id, ingredientes]) => {
+        agrupados.push({ producto_id, ingredientes });
+      });
+      setProductoIngredientes(agrupados);
+    }
     setCargando(false);
   }, []);
 
@@ -120,6 +134,15 @@ export default function HomePage() {
         .map((pt) => pt.toppings);
     },
     [productoToppings]
+  );
+
+  const getIngredientesDeProducto = useCallback(
+    (productoId: string): Ingrediente[] => {
+      return productoIngredientes
+        .find(p => p.producto_id === productoId)
+        ?.ingredientes ?? [];
+    },
+    [productoIngredientes]
   );
 
   const productosFiltrados = useMemo(() => {
@@ -419,6 +442,7 @@ export default function HomePage() {
           producto={productoConfigurador}
           grupo_variantes={getVariantesDeProducto(productoConfigurador.id)}
           toppings_disponibles={getToppingsDeProducto(productoConfigurador.id)}
+          ingredientes_disponibles={getIngredientesDeProducto(productoConfigurador.id)}
           onCerrar={() => setProductoConfigurador(null)}
           onConfirmar={handleConfirmarConfiguracion}
         />

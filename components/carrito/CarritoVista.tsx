@@ -116,6 +116,13 @@ export function CarritoVista({ onIrCheckout, onSeguirComprando }: CarritoVistaPr
                                     </p>
                                 )}
 
+                                {/* Ingredientes removidos */}
+                                {item.ingredientes_removidos && item.ingredientes_removidos.length > 0 && (
+                                    <p className="text-xs text-red-400 truncate">
+                                        Sin: {item.ingredientes_removidos.join(', ')}
+                                    </p>
+                                )}
+
                                 {/* Precio unitario */}
                                 <span className="text-xs text-cafe-400">
                                     {formatearPrecio(item.precio_final)} c/u

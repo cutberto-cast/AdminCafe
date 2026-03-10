@@ -38,6 +38,7 @@ export interface Producto {
     acepta_toppings: boolean;
     precio_topping_extra: number;
     toppings_gratis: number;
+    tiene_ingredientes: boolean;
 }
 
 export interface GrupoVariantes {
@@ -59,6 +60,13 @@ export interface Topping {
     id: string;
     nombre: string;
     activo: boolean;
+}
+
+export interface Ingrediente {
+    id: string;
+    producto_id: string;
+    nombre: string;
+    orden: number;
 }
 
 export interface Banner {
@@ -96,6 +104,7 @@ export interface CarritoItem {
     cantidad: number;
     variante_elegida?: Variante | null;
     toppings_elegidos?: Topping[];
+    ingredientes_removidos?: string[];
     precio_final: number;
 }
 

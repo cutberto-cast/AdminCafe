@@ -9,8 +9,16 @@ const generarKey = (item: CarritoItem): string => {
     const topKey = [...(item.toppings_elegidos || [])]
         .sort((a, b) => a.id.localeCompare(b.id))
         .map((t) => t.id)
-        .join('-');
-    return `${item.producto.id}-${varKey}-${topKey || 'sin-toppings'}`;
+        .join(',');
+    const ingKey = [...(item.ingredientes_removidos || [])]
+        .sort()
+        .join(',');
+    return [
+        item.producto.id,
+        varKey,
+        topKey || 'sin-toppings',
+        ingKey || 'sin-removidos',
+    ].join('|');
 };
 
 interface CarritoStore {

@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import Image from 'next/image';
-import type { Producto, Variante, Topping, CarritoItem } from '@/types';
+import type { Producto, Variante, Topping, CarritoItem, Ingrediente } from '@/types';
 import type { GrupoConVariantes } from '@/types/variantes';
 import { formatearPrecio } from '@/lib/utils/formatearPrecio';
 
@@ -10,6 +10,7 @@ interface ConfiguradorProductoProps {
     producto: Producto;
     grupo_variantes: GrupoConVariantes | null;
     toppings_disponibles: Topping[];
+    ingredientes_disponibles: Ingrediente[];
     onCerrar: () => void;
     onConfirmar: (item: CarritoItem) => void;
 }
@@ -18,6 +19,7 @@ export function ConfiguradorProducto({
     producto,
     grupo_variantes,
     toppings_disponibles,
+    ingredientes_disponibles,
     onCerrar,
     onConfirmar,
 }: ConfiguradorProductoProps) {
@@ -27,12 +29,47 @@ export function ConfiguradorProducto({
     const [errorVariante, setErrorVariante] = useState(false);
     const [errorToppings, setErrorToppings] = useState(false);
 
+    // Ingredientes removibles
+    const [ingredientesActivos, setIngredientesActivos] = useState<string[]>([]);
+
+    useEffect(() => {
+        if (ingredientes_disponibles.length > 0) {
+            setIngredientesActivos(ingredientes_disponibles.map(i => i.id));
+        }
+    }, [ingredientes_disponibles]);
+
+    const ingredientesRemovidos = ingredientes_disponibles
+        .filter(i => !ingredientesActivos.includes(i.id))
+        .map(i => i.nombre);
+
+    const todosActivos = ingredientesActivos.length === ingredientes_disponibles.length;
+
+    const toggleIngrediente = (id: string) => {
+        setIngredientesActivos(prev =>
+            prev.includes(id)
+                ? prev.filter(x => x !== id)
+                : [...prev, id]
+        );
+    };
+
+    const toggleTodo = () => {
+        if (todosActivos) {
+            setIngredientesActivos([]);
+        } else {
+            setIngredientesActivos(ingredientes_disponibles.map(i => i.id));
+        }
+    };
+
     const precioUnitario = useMemo(() => {
-        let base = 0;
+        let base = producto.precio ?? 0;
+
         if (producto.tiene_variantes && varianteElegida) {
-            base = varianteElegida.precio;
-        } else if (!producto.tiene_variantes) {
-            base = producto.precio ?? 0;
+            // Si la variante tiene precio definido > 0, usarlo.
+            // Si no, mantener el precio base del producto.
+            if (varianteElegida.precio && varianteElegida.precio > 0) {
+                base = varianteElegida.precio;
+            }
+            // else: base ya es producto.precio, no cambiar
         }
 
         const toppingsExtra = Math.max(0, toppingsElegidos.length - producto.toppings_gratis);
@@ -68,6 +105,7 @@ export function ConfiguradorProducto({
             cantidad,
             variante_elegida: varianteElegida || null,
             toppings_elegidos: toppingsElegidos,
+            ingredientes_removidos: ingredientesRemovidos,
             precio_final: precioUnitario,
         });
     };
@@ -250,6 +288,85 @@ export function ConfiguradorProducto({
                             )}
                         </div>
                     )}
+                    {/* ═══ SECCIÓN INGREDIENTES ═══ */}
+                    {producto.tiene_ingredientes &&
+                        ingredientes_disponibles.length > 0 && (
+                            <div className="space-y-2.5">
+                                {/* Header con botón Con todo */}
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-sm font-bold text-cafe-800 uppercase tracking-wide">
+                                            Personaliza tus ingredientes
+                                        </h3>
+                                        <p className="text-xs text-cafe-400">
+                                            Desmarca lo que no quieres
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={toggleTodo}
+                                        className={`text-xs font-semibold px-3 py-1.5 rounded-full border transition-all ${todosActivos
+                                            ? 'bg-cafe-700 text-white border-cafe-700'
+                                            : 'bg-white text-cafe-600 border-cafe-300'
+                                            }`}
+                                    >
+                                        {todosActivos ? '✓ Con todo' : 'Con todo'}
+                                    </button>
+                                </div>
+
+                                {/* Lista de ingredientes */}
+                                <div className="space-y-2">
+                                    {ingredientes_disponibles.map((ingrediente) => {
+                                        const activo = ingredientesActivos.includes(ingrediente.id);
+                                        return (
+                                            <button
+                                                key={ingrediente.id}
+                                                type="button"
+                                                onClick={() => toggleIngrediente(ingrediente.id)}
+                                                className={`w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all text-left ${activo
+                                                    ? 'border-cafe-200 bg-white'
+                                                    : 'border-red-200 bg-red-50'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`w-5 h-5 rounded flex items-center justify-center flex-shrink-0 transition-colors ${activo
+                                                        ? 'bg-cafe-600 border-2 border-cafe-600'
+                                                        : 'bg-white border-2 border-red-300'
+                                                        }`}>
+                                                        {activo && (
+                                                            <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                                            </svg>
+                                                        )}
+                                                    </div>
+                                                    <span className={`text-sm font-medium transition-colors ${activo
+                                                        ? 'text-cafe-800'
+                                                        : 'text-red-400 line-through'
+                                                        }`}>
+                                                        {ingrediente.nombre}
+                                                    </span>
+                                                </div>
+                                                {!activo && (
+                                                    <span className="text-[10px] font-semibold text-red-400 uppercase tracking-wide">
+                                                        Sin esto
+                                                    </span>
+                                                )}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Resumen si hay removidos */}
+                                {ingredientesRemovidos.length > 0 && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                                        <p className="text-xs text-amber-700 font-medium">
+                                            ⚠️ Sin:{' '}
+                                            {ingredientesRemovidos.join(', ')}
+                                        </p>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                 </div>
 
                 {/* Footer fijo — cantidad + botón agregar */}

@@ -38,11 +38,13 @@ export default function AdminProductosPage() {
         precio_topping_extra: '0',
         toppings_gratis: '0',
         toppings_seleccionados: [] as string[],
+        tiene_ingredientes: false,
     });
 
     // Estado para el constructor de variantes
     const [nombreGrupo, setNombreGrupo] = useState('');
     const [variantesForm, setVariantesForm] = useState<VarianteForm[]>([]);
+    const [ingredientesForm, setIngredientesForm] = useState<{ tempId: string; nombre: string }[]>([]);
 
     const supabase = createClient();
 
@@ -84,9 +86,11 @@ export default function AdminProductosPage() {
             precio_topping_extra: '0',
             toppings_gratis: '0',
             toppings_seleccionados: [],
+            tiene_ingredientes: false,
         });
         setNombreGrupo('');
         setVariantesForm([]);
+        setIngredientesForm([]);
         setModalAbierto(true);
     };
 
@@ -104,9 +108,11 @@ export default function AdminProductosPage() {
             precio_topping_extra: (producto.precio_topping_extra ?? 0).toString(),
             toppings_gratis: (producto.toppings_gratis ?? 0).toString(),
             toppings_seleccionados: [],
+            tiene_ingredientes: producto.tiene_ingredientes ?? false,
         });
         setNombreGrupo('');
         setVariantesForm([]);
+        setIngredientesForm([]);
 
         // Cargar variantes del producto
         if (producto.tiene_variantes) {
@@ -131,7 +137,7 @@ export default function AdminProductosPage() {
                         vars.map((v: Variante) => ({
                             tempId: v.id,
                             nombre: v.nombre,
-                            precio: v.precio.toString(),
+                            precio: v.precio?.toString() ?? '',
                         }))
                     );
                 }
@@ -150,6 +156,23 @@ export default function AdminProductosPage() {
                     ...prev,
                     toppings_seleccionados: pt.map((r: { topping_id: string }) => r.topping_id),
                 }));
+            }
+        }
+
+        // Cargar ingredientes del producto
+        if (producto.tiene_ingredientes) {
+            const { data } = await supabase
+                .from('producto_ingredientes')
+                .select('*')
+                .eq('producto_id', producto.id)
+                .order('orden');
+            if (data) {
+                setIngredientesForm(
+                    data.map((i: { id: string; nombre: string }) => ({
+                        tempId: i.id,
+                        nombre: i.nombre
+                    }))
+                );
             }
         }
 
@@ -229,6 +252,7 @@ export default function AdminProductosPage() {
             acepta_toppings: form.acepta_toppings,
             precio_topping_extra: form.acepta_toppings ? parseFloat(form.precio_topping_extra) || 0 : 0,
             toppings_gratis: form.acepta_toppings ? parseInt(form.toppings_gratis) || 0 : 0,
+            tiene_ingredientes: form.tiene_ingredientes,
         };
 
         let productoId = productoEditando?.id;
@@ -266,11 +290,13 @@ export default function AdminProductosPage() {
                 if (grupo) {
                     // Insertar variantes
                     const variantesInsert = variantesForm
-                        .filter((v) => v.nombre.trim() && v.precio)
+                        .filter((v) => v.nombre.trim())
                         .map((v, idx) => ({
                             grupo_id: grupo.id,
                             nombre: v.nombre.trim(),
-                            precio: parseFloat(v.precio),
+                            precio: v.precio && Number(v.precio) > 0
+                                ? Number(v.precio)
+                                : null,
                             orden: idx,
                         }));
 
@@ -295,6 +321,37 @@ export default function AdminProductosPage() {
                 }));
                 const { error: tErr } = await supabase.from('producto_toppings').insert(toppingsInsert);
                 if (tErr) throw tErr;
+            }
+
+            // --- Guardar ingredientes ---
+            if (form.tiene_ingredientes) {
+                // Eliminar ingredientes anteriores
+                await supabase
+                    .from('producto_ingredientes')
+                    .delete()
+                    .eq('producto_id', productoId);
+
+                // Insertar nuevos (filtrar nombres vacíos)
+                const ingValidos = ingredientesForm
+                    .filter(i => i.nombre.trim() !== '');
+
+                if (ingValidos.length > 0) {
+                    await supabase
+                        .from('producto_ingredientes')
+                        .insert(
+                            ingValidos.map((ing, idx) => ({
+                                producto_id: productoId,
+                                nombre: ing.nombre.trim(),
+                                orden: idx,
+                            }))
+                        );
+                }
+            } else {
+                // Si se desactivó, limpiar ingredientes
+                await supabase
+                    .from('producto_ingredientes')
+                    .delete()
+                    .eq('producto_id', productoId);
             }
         } catch (err) {
             console.error('Error al guardar:', err);
@@ -328,10 +385,13 @@ export default function AdminProductosPage() {
     };
 
     const getTipoProducto = (producto: Producto): string => {
-        if (producto.tiene_variantes && producto.acepta_toppings) return 'Configurable';
-        if (producto.tiene_variantes) return 'Variable';
-        if (producto.acepta_toppings && !producto.tiene_variantes) return 'Con toppings';
-        return 'Simple';
+        const partes: string[] = [];
+        if (producto.tiene_variantes) partes.push('Variable');
+        if (producto.acepta_toppings) partes.push('Con toppings');
+        if (producto.tiene_ingredientes) partes.push('Con ingredientes');
+        if (partes.length === 0) return 'Simple';
+        if (partes.length >= 2) return 'Configurable';
+        return partes[0] ?? 'Simple';
     };
 
     if (cargando) {
@@ -758,15 +818,18 @@ export default function AdminProductosPage() {
                                                         placeholder="Nombre (Ej: Grande)"
                                                         className="flex-1 px-3 py-2 border border-[var(--color-borde)] rounded-md text-[13px] text-[var(--color-texto-1)] placeholder:text-[var(--color-texto-3)] focus:outline-none focus:ring-1 focus:ring-[var(--color-espresso)] shadow-sm transition-all"
                                                     />
-                                                    <input
-                                                        type="number"
-                                                        value={v.precio}
-                                                        onChange={(e) => actualizarVariante(v.tempId, 'precio', e.target.value)}
-                                                        placeholder="Precio"
-                                                        className="w-24 px-3 py-2 border border-[var(--color-borde)] rounded-md text-[13px] text-[var(--color-texto-1)] placeholder:text-[var(--color-texto-3)] focus:outline-none focus:ring-1 focus:ring-[var(--color-espresso)] shadow-sm transition-all"
-                                                        min="0"
-                                                        step="0.5"
-                                                    />
+                                                    <div>
+                                                        <input
+                                                            type="number"
+                                                            value={v.precio || ''}
+                                                            onChange={(e) => actualizarVariante(v.tempId, 'precio', e.target.value)}
+                                                            placeholder="Precio (opcional)"
+                                                            className="w-28 px-3 py-2 border border-[var(--color-borde)] rounded-md text-[13px] text-[var(--color-texto-1)] placeholder:text-[var(--color-texto-3)] focus:outline-none focus:ring-1 focus:ring-[var(--color-espresso)] shadow-sm transition-all"
+                                                            min="0"
+                                                            step="0.5"
+                                                        />
+                                                        <p className="text-[10px] text-[var(--color-texto-3)] mt-0.5 leading-tight">Vacío = usa precio del producto</p>
+                                                    </div>
                                                     <button
                                                         onClick={() => eliminarVariante(v.tempId)}
                                                         className="p-2 text-red-400 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
@@ -866,6 +929,81 @@ export default function AdminProductosPage() {
                                             </div>
                                         </div>
                                     </>
+                                )}
+                            </div>
+
+                            {/* ═══ SECCIÓN INGREDIENTES ═══ */}
+                            <div className="border-t border-[var(--color-borde)] pt-5">
+                                <div className="flex items-center justify-between mb-3">
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-[var(--color-texto-1)]">
+                                            Ingredientes personalizables
+                                        </h3>
+                                        <p className="text-xs text-[var(--color-texto-3)] mt-0.5">
+                                            Ingredientes que el cliente puede quitar. No incluyas ingredientes básicos (pan, carne...).
+                                        </p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setForm(f => ({
+                                                ...f,
+                                                tiene_ingredientes: !f.tiene_ingredientes
+                                            }));
+                                        }}
+                                        className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${form.tiene_ingredientes
+                                            ? 'bg-[var(--color-matcha)]'
+                                            : 'bg-red-400'
+                                            }`}
+                                    >
+                                        <span className="inline-block h-3.5 w-3.5 rounded-full bg-white shadow-sm transition-transform"
+                                            style={{
+                                                transform: form.tiene_ingredientes
+                                                    ? 'translateX(18px)'
+                                                    : 'translateX(4px)'
+                                            }} />
+                                    </button>
+                                </div>
+
+                                {form.tiene_ingredientes && (
+                                    <div className="space-y-2">
+                                        {ingredientesForm.map((ing, idx) => (
+                                            <div key={ing.tempId} className="flex items-center gap-2">
+                                                <input
+                                                    type="text"
+                                                    value={ing.nombre}
+                                                    onChange={(e) => {
+                                                        const nuevo = [...ingredientesForm];
+                                                        nuevo[idx]!.nombre = e.target.value;
+                                                        setIngredientesForm(nuevo);
+                                                    }}
+                                                    placeholder="Ej: Salsa especial, Rajas..."
+                                                    className="flex-1 px-3 py-2 border border-[var(--color-borde)] rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-[var(--color-espresso)]/20"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setIngredientesForm(
+                                                        ingredientesForm.filter((_, i) => i !== idx)
+                                                    )}
+                                                    className="p-2 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                >
+                                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                    </svg>
+                                                </button>
+                                            </div>
+                                        ))}
+                                        <button
+                                            type="button"
+                                            onClick={() => setIngredientesForm([
+                                                ...ingredientesForm,
+                                                { tempId: `temp-${Date.now()}`, nombre: '' }
+                                            ])}
+                                            className="w-full py-2 border-2 border-dashed border-[var(--color-borde)] rounded-lg text-sm text-[var(--color-texto-3)] hover:border-[var(--color-espresso)]/30 hover:text-[var(--color-texto-2)] transition-colors"
+                                        >
+                                            + Agregar ingrediente
+                                        </button>
+                                    </div>
                                 )}
                             </div>
 

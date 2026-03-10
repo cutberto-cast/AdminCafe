@@ -21,7 +21,7 @@ export function ProductoCard({
 }: ProductoCardProps) {
     const agregarSimple = useCarrito((state) => state.agregarSimple);
 
-    const esConfigurable = producto.tiene_variantes || producto.acepta_toppings;
+    const esConfigurable = producto.tiene_variantes || producto.acepta_toppings || producto.tiene_ingredientes;
 
     const handleBotonAgregar = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -91,9 +91,11 @@ export function ProductoCard({
                 </h3>
                 <div className="flex items-center justify-between mt-2">
                     <span className="text-cafe-600 font-bold text-base sm:text-lg">
-                        {producto.tiene_variantes
-                            ? 'Desde...'
-                            : formatearPrecio(producto.precio ?? 0)}
+                        {producto.tiene_variantes && !producto.precio
+                            ? 'Ver opciones'
+                            : producto.tiene_variantes && producto.precio
+                                ? `Desde ${formatearPrecio(producto.precio)}`
+                                : formatearPrecio(producto.precio ?? 0)}
                     </span>
                 </div>
                 {esConfigurable && (
