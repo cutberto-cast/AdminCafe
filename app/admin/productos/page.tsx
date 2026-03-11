@@ -241,10 +241,17 @@ export default function AdminProductosPage() {
 
         setGuardando(true);
 
+        // Si tiene variantes: conservar precio del formulario
+        // si existe, o null si está vacío.
+        // Esto permite combos con precio fijo + variantes de sabor.
+        const precioFinal = form.precio && form.precio !== ''
+            ? parseFloat(form.precio)
+            : null;
+
         const datos = {
             nombre: form.nombre,
             descripcion: form.descripcion,
-            precio: form.tiene_variantes ? null : parseFloat(form.precio),
+            precio: precioFinal,
             imagen_url: form.imagen_url,
             categoria_id: form.categoria_id,
             esta_disponible: form.esta_disponible,
@@ -786,13 +793,31 @@ export default function AdminProductosPage() {
                                     </button>
                                 </div>
 
-                                {/* Campo de precio fijo */}
-                                {!form.tiene_variantes && (
-                                    <div>
-                                        <label className="block text-xs font-medium text-[var(--color-texto-2)] mb-1.5">Precio (MXN) *</label>
-                                        <input type="number" value={form.precio} onChange={(e) => setForm({ ...form, precio: e.target.value })} className="w-full px-3 py-2 border border-[var(--color-borde)] rounded-lg text-[13px] text-[var(--color-texto-1)] placeholder:text-[var(--color-texto-3)] focus:outline-none focus:ring-1 focus:ring-[var(--color-espresso)] shadow-sm transition-all" min="0" step="0.5" />
-                                    </div>
-                                )}
+                                {/* Precio base — siempre visible */}
+                                <div>
+                                    <label className="block text-xs font-medium text-[var(--color-texto-2)] mb-1.5">
+                                        Precio base (MXN)
+                                        {!form.tiene_variantes && (
+                                            <span className="text-red-400 ml-1">*</span>
+                                        )}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={form.precio}
+                                        onChange={(e) => setForm({ ...form, precio: e.target.value })}
+                                        className="w-full px-3 py-2 border border-[var(--color-borde)] rounded-lg text-[13px] text-[var(--color-texto-1)] placeholder:text-[var(--color-texto-3)] focus:outline-none focus:ring-1 focus:ring-[var(--color-espresso)] shadow-sm transition-all"
+                                        min="0"
+                                        step="0.5"
+                                        placeholder={form.tiene_variantes
+                                            ? 'Ej: 100 (precio del combo)'
+                                            : 'Ej: 50'}
+                                    />
+                                    {form.tiene_variantes && (
+                                        <p className="text-[10px] text-[var(--color-texto-3)] mt-1">
+                                            Precio del producto completo. Las variantes son solo opciones de personalización sin costo adicional (a menos que especifiques un precio en cada variante).
+                                        </p>
+                                    )}
+                                </div>
 
                                 {/* Constructor de variantes */}
                                 {form.tiene_variantes && (

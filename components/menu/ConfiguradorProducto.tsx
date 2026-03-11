@@ -118,6 +118,10 @@ export function ConfiguradorProducto({
         'Crepa Dulce', 'Crepa Salada', 'Waffle', 'Marquesita'
     ].includes(producto.nombre);
 
+    const esCombo =
+        producto.tiene_variantes &&
+        producto.tiene_ingredientes;
+
     const labelSaborTopping = esSabores ? 'sabor' : 'topping';
     const labelSaboresPlural = esSabores ? 'sabores' : 'toppings';
 
@@ -198,9 +202,11 @@ export function ConfiguradorProducto({
                                                 {variante.nombre}
                                             </span>
                                         </div>
-                                        <span className="font-bold text-sm text-cafe-700">
-                                            {formatearPrecio(variante.precio)}
-                                        </span>
+                                        {variante.precio && variante.precio > 0 && (
+                                            <span className="font-bold text-sm text-cafe-700">
+                                                {formatearPrecio(variante.precio)}
+                                            </span>
+                                        )}
                                     </button>
                                 ))}
                             </div>
@@ -296,10 +302,14 @@ export function ConfiguradorProducto({
                                 <div className="flex items-center justify-between">
                                     <div>
                                         <h3 className="text-sm font-bold text-cafe-800 uppercase tracking-wide">
-                                            Personaliza tus ingredientes
+                                            {esCombo
+                                                ? 'Personaliza tus papas'
+                                                : 'Personaliza tus ingredientes'}
                                         </h3>
                                         <p className="text-xs text-cafe-400">
-                                            Desmarca lo que no quieres
+                                            {esCombo
+                                                ? 'Desmarca lo que no quieres en tus papas'
+                                                : 'Desmarca lo que no quieres'}
                                         </p>
                                     </div>
                                     <button
