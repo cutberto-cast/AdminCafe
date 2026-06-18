@@ -13,30 +13,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: 'Cafecito | Menú Digital — Tuxpanguillo, Veracruz',
   description:
-    'Cafecito en Tuxpanguillo, Ixtaczoquitlan, Veracruz. Explora nuestro menú digital, arma tu pedido y envíalo por WhatsApp. Crepas, wafles, marquesitas, frappés, bubble tea, alitas y más.',
+    'Explora nuestro menú digital, arma tu pedido y envíalo por WhatsApp. Crepas, wafles, marquesitas, frappés, bubble tea, alitas y más.',
   keywords: [
     'cafetería',
     'Cafecito',
-    'Tuxpanguillo',
-    'Ixtaczoquitlan',
-    'Veracruz',
-    'menú digital',
-    'pedidos por WhatsApp',
-    'crepas',
-    'wafles',
-    'marquesitas',
-    'frappés',
-    'bubble tea',
-    'alitas',
-    'café de especialidad',
-    'cafetería Veracruz',
+
   ],
   authors: [{ name: 'Cafecito' }],
   creator: 'Cafecito',
   openGraph: {
     title: 'Cafecito | Menú Digital — Tuxpanguillo, Veracruz',
     description:
-      'Cafecito en Tuxpanguillo, Ixtaczoquitlan, Veracruz. Crepas, wafles, marquesitas, frappés, bubble tea y más. Arma tu pedido y envíalo por WhatsApp.',
+      ' Crepas, wafles, marquesitas, frappés, bubble tea y más. Arma tu pedido y envíalo por WhatsApp.',
     type: 'website',
     locale: 'es_MX',
     siteName: 'Cafecito',

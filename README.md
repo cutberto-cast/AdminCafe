@@ -1,11 +1,13 @@
 # Cafecito — Menú Digital con Pedidos por WhatsApp
 
+[![CI](https://github.com/cutberto-cast/WhatsCoffee/actions/workflows/ci.yml/badge.svg)](https://github.com/cutberto-cast/WhatsCoffee/actions/workflows/ci.yml)
+
 > ⚠️ **Proyecto demo con fines de portafolio.** "Cafecito" no es un negocio real: no se procesan pagos ni pedidos reales. El panel de administración es público a propósito para que puedas explorarlo — usa el botón **"Restaurar datos demo"** en Configuración si quieres devolver los datos a su estado original.
 
 Aplicación full-stack de menú digital para una cafetería: catálogo de productos con variantes/toppings/ingredientes personalizables, carrito, checkout que genera un mensaje de WhatsApp listo para enviar, y un panel de administración completo para gestionar el negocio sin tocar código.
 
-🔗 **Demo en vivo:** _pendiente de desplegar_
-🔑 **Acceso admin de prueba:** `admin@cafeorder.com` / `admin12345` (en `/admin/login`)
+🔗 **Demo en vivo:** https://admin-cafe-two.vercel.app
+🔑 **Acceso admin de prueba:** `admin@cafeorder.com` / `admin12345` (en [/admin/login](https://admin-cafe-two.vercel.app/admin/login))
 
 ## Capturas
 

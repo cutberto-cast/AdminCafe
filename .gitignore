@@ -45,3 +45,6 @@ next-env.d.ts
 
 # Supabase local
 supabase/.temp/
+
+# Notas privadas, no para el repo público
+docs/portfolio-pitch.md

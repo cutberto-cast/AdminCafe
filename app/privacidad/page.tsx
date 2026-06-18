@@ -16,7 +16,7 @@ export default function PrivacidadPage() {
                 <p>
                     <strong>Nombre del negocio:</strong> Cafecito (cuenta de demostración / prueba, no es un negocio real)
                     <br />
-                    <strong>Ubicación:</strong> Tuxpanguillo, Ixtaczoquitlan, Veracruz, México (ubicación ilustrativa)
+                    <strong>Ubicación:</strong> México (ubicación ilustrativa)
                     <br />
                     <strong>Contacto:</strong> vía WhatsApp (el número configurado en el negocio)
                     <br />
@@ -200,7 +200,7 @@ export default function PrivacidadPage() {
                 {/* Footer de la página */}
                 <div className="border-t border-gray-100 pt-6 text-center">
                     <p className="text-xs text-gray-400">
-                        © {anioActual} Cafecito — Tuxpanguillo, Ixtaczoquitlan, Veracruz
+                        © {anioActual} Cafe
                     </p>
                     <a href="/" className="inline-block mt-3 text-sm font-medium text-[#4A2C2A] hover:underline">
                         ← Volver al menú
