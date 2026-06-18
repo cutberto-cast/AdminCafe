@@ -10,8 +10,8 @@ jobs:
   lint-and-build:
     runs-on: ubuntu-latest
     env:
-      NEXT_PUBLIC_SUPABASE_URL: https://vcarfmhherrkevzziqdq.supabase.co
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZjYXJmbWhoZXJya2V2enppcWRxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MjAzMDQsImV4cCI6MjA5NzI5NjMwNH0.8uck-z7J6En8IO52e41aTKj3VnUCaUO4QRIOkhJKomg
+      NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
     steps:
       - uses: actions/checkout@v4
 

@@ -70,7 +70,7 @@ npm run dev
 | `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave pública (anon) del proyecto Supabase |
 
-El esquema completo (tablas, RLS, políticas de Storage) está en `migracion_variantes_toppings.sql`, `banners_migration.sql` y `reset_demo_data.sql`.
+El esquema base (tablas `productos`, `categorias`, `cafeterias`) se administra desde el dashboard de Supabase. Las migraciones incrementales posteriores (variantes/toppings, banners, función de reseteo de datos demo) están versionadas en `supabase/migrations/`.
 
 ## CI
 
