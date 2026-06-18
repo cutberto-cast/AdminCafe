@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Cafecito — Menú Digital con Pedidos por WhatsApp
 
-## Getting Started
+> ⚠️ **Proyecto demo con fines de portafolio.** "Cafecito" no es un negocio real: no se procesan pagos ni pedidos reales. El panel de administración es público a propósito para que puedas explorarlo — usa el botón **"Restaurar datos demo"** en Configuración si quieres devolver los datos a su estado original.
 
-First, run the development server:
+Aplicación full-stack de menú digital para una cafetería: catálogo de productos con variantes/toppings/ingredientes personalizables, carrito, checkout que genera un mensaje de WhatsApp listo para enviar, y un panel de administración completo para gestionar el negocio sin tocar código.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+🔗 **Demo en vivo:** _pendiente de desplegar_
+🔑 **Acceso admin de prueba:** `admin@cafeorder.com` / `admin12345` (en `/admin/login`)
+
+## Capturas
+
+| Tienda (cliente) | Panel de administración |
+|---|---|
+| ![Tienda](docs/screenshots/tienda.png) | ![Admin](docs/screenshots/admin-dashboard.png) |
+
+## Stack
+
+- **Next.js 16** (App Router, Turbopack) + React 19 + TypeScript
+- **Supabase**: Postgres con Row Level Security, Auth (email/password) y Storage para imágenes
+- **Tailwind CSS 4** + **Zustand** (estado del carrito) + **Zod**
+- **Playwright** para verificación end-to-end manual del flujo de compra y admin
+
+## Funcionalidad
+
+**Tienda pública**
+- Catálogo filtrable por categoría, con buscador
+- Productos con variantes (ej. sabor), toppings opcionales con límite de gratuitos, e ingredientes removibles
+- Carrito persistente y checkout que arma el pedido como mensaje de WhatsApp (`api.whatsapp.com/send`)
+- Pago por efectivo o transferencia (muestra los datos bancarios configurados por el admin)
+
+**Panel admin** (`/admin`, protegido con Supabase Auth)
+- CRUD de productos, categorías, banners promocionales y toppings
+- Editor de variantes e ingredientes por producto
+- Configuración del negocio (nombre, WhatsApp, color de marca, datos bancarios)
+- Subida de imágenes a Supabase Storage
+- Botón de **reset a datos demo** (función Postgres `reset_demo_data()`) para que el panel público siempre pueda volver a un estado conocido
+- Bloqueo temporal tras 5 intentos fallidos de login (protección básica anti fuerza bruta)
+
+## Arquitectura
+
+```
+Next.js (App Router)
+ ├─ app/                  rutas públicas (/, /privacidad) y admin (/admin/**)
+ ├─ components/           UI de tienda, carrito y admin
+ ├─ lib/supabase/         clientes Supabase (browser y server, vía @supabase/ssr)
+ ├─ stores/               estado del carrito (Zustand)
+ └─ types/                tipos del dominio
+
+Supabase (Postgres + Auth + Storage)
+ ├─ RLS: lectura pública en catálogo, escritura solo para usuarios "authenticated"
+ ├─ Esquema preparado para multi-tenant (tabla cafeterias / cafeteria_id),
+ │  aunque la app actual opera en modo single-tenant
+ └─ Función reset_demo_data() para restaurar el seed de demostración
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Correr el proyecto localmente
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm install
+cp .env.example .env.local   # completa con tu propio proyecto Supabase
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Variables de entorno
 
-## Learn More
+| Variable | Descripción |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL del proyecto Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Clave pública (anon) del proyecto Supabase |
 
-To learn more about Next.js, take a look at the following resources:
+El esquema completo (tablas, RLS, políticas de Storage) está en `migracion_variantes_toppings.sql`, `banners_migration.sql` y `reset_demo_data.sql`.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## CI
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Cada push a `main` corre lint + build vía GitHub Actions (`.github/workflows/ci.yml`).

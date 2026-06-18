@@ -14,9 +14,9 @@ export default function PrivacidadPage() {
             titulo: 'Identidad del Responsable',
             contenido: (
                 <p>
-                    <strong>Nombre del negocio:</strong> Cafecito
+                    <strong>Nombre del negocio:</strong> Cafecito (cuenta de demostración / prueba, no es un negocio real)
                     <br />
-                    <strong>Ubicación:</strong> Tuxpanguillo, Ixtaczoquitlan, Veracruz, México
+                    <strong>Ubicación:</strong> Tuxpanguillo, Ixtaczoquitlan, Veracruz, México (ubicación ilustrativa)
                     <br />
                     <strong>Contacto:</strong> vía WhatsApp (el número configurado en el negocio)
                     <br />
@@ -165,6 +165,16 @@ export default function PrivacidadPage() {
             <div className="max-w-2xl mx-auto px-4 py-8 space-y-8">
                 {/* Fecha actualización */}
                 <p className="text-xs text-gray-400">Última actualización: {fechaActual}</p>
+
+                {/* Aviso de cuenta demo */}
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+                    <p className="text-sm text-amber-800 leading-relaxed">
+                        <strong>Aviso importante:</strong> Este sitio es una <strong>cuenta de demostración con fines de
+                        prueba y desarrollo</strong>. &quot;Cafecito&quot; no es un negocio real en operación, no se
+                        procesan pedidos reales y no se realizan cobros ni entregas. Cualquier dato ingresado aquí es
+                        únicamente para fines de demostración.
+                    </p>
+                </div>
 
                 {/* Intro */}
                 <p className="text-gray-600 text-sm leading-relaxed">

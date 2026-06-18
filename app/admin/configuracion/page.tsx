@@ -7,6 +7,8 @@ export default function AdminConfiguracionPage() {
     const [cargandoDatos, setCargandoDatos] = useState(true);
     const [guardando, setGuardando] = useState(false);
     const [exito, setExito] = useState(false);
+    const [restaurando, setRestaurando] = useState(false);
+    const [errorRestaurar, setErrorRestaurar] = useState('');
 
     const [form, setForm] = useState({
         id: '',
@@ -69,6 +71,25 @@ export default function AdminConfiguracionPage() {
         }
 
         setGuardando(false);
+    };
+
+    const handleRestaurarDemo = async () => {
+        const confirmado = window.confirm(
+            'Esto borrará todos los productos, categorías, banners y toppings actuales y los reemplazará por el set de datos demo original. ¿Continuar?'
+        );
+        if (!confirmado) return;
+
+        setRestaurando(true);
+        setErrorRestaurar('');
+
+        const { error } = await supabase.rpc('reset_demo_data');
+
+        if (error) {
+            setErrorRestaurar('No se pudo restaurar: ' + error.message);
+            setRestaurando(false);
+        } else {
+            window.location.reload();
+        }
     };
 
     if (cargandoDatos) {
@@ -247,6 +268,28 @@ export default function AdminConfiguracionPage() {
                         {guardando ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : 'Guardar Cambios'}
                     </button>
                 </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-2xl p-6 md:p-8">
+                <h3 className="text-sm font-semibold text-amber-900">Zona de demostración</h3>
+                <p className="text-xs text-amber-800 mt-1 mb-4">
+                    Este panel es público para fines de portafolio. Si los datos quedaron desordenados por pruebas,
+                    puedes restaurarlos al set demo original (productos, categorías, banners, toppings y configuración).
+                </p>
+                {errorRestaurar && (
+                    <p className="text-xs text-red-600 mb-3">{errorRestaurar}</p>
+                )}
+                <button
+                    onClick={handleRestaurarDemo}
+                    disabled={restaurando}
+                    className="bg-amber-600 hover:bg-amber-700 disabled:opacity-50 text-white font-medium px-6 py-2.5 rounded-xl transition-all text-sm flex items-center justify-center gap-2"
+                >
+                    {restaurando ? (
+                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : (
+                        'Restaurar datos demo'
+                    )}
+                </button>
             </div>
 
             {exito && (
