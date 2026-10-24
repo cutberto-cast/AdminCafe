@@ -17,6 +17,7 @@ export const MACRO_CATEGORIAS_CONFIG: MacroCategoriaConfig[] = [
 
 export interface Categoria {
     id: string;
+    cafeteria_id: string;
     nombre: string;
     icono?: string | null;
     orden: number;
@@ -26,6 +27,7 @@ export interface Categoria {
 
 export interface Producto {
     id: string;
+    cafeteria_id: string;
     nombre: string;
     descripcion: string;
     precio: number | null;

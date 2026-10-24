@@ -52,6 +52,27 @@ Supabase (Postgres + Auth + Storage)
 
 ## Correr el proyecto localmente
 
+La aplicación está en la carpeta `cafeorder`. Desde la raíz del repositorio,
+entra primero con `cd cafeorder`.
+
+En Windows con PowerShell, usa `npm.cmd` si aparece el error de que
+`npm.ps1` no se puede ejecutar porque la ejecución de scripts está deshabilitada:
+
+```powershell
+cd C:\Proyectos\MenuDigital\cafeorder
+npm.cmd install
+# Solo si todavía no existe .env.local:
+Copy-Item .env.example .env.local
+# Completa las dos variables de Supabase en .env.local antes de arrancar.
+npm.cmd run dev
+```
+
+Abre http://localhost:3000 (administración: http://localhost:3000/admin).
+Si `.env.local` ya está configurado, consérvalo. Reinicia el servidor después
+de cambiar variables de entorno. El servidor corre en tu equipo, pero los datos,
+la autenticación y las imágenes siguen dependiendo del proyecto remoto de
+Supabase y requieren conexión a Internet.
+
 ```bash
 npm install
 cp .env.example .env.local   # completa con tu propio proyecto Supabase

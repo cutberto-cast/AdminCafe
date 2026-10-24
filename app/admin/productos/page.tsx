@@ -270,7 +270,14 @@ export default function AdminProductosPage() {
                 if (error) throw error;
                 setProductos(productos.map((p) => p.id === productoEditando.id ? { ...p, ...datos } as Producto : p));
             } else {
-                const { data, error } = await supabase.from('productos').insert(datos).select().single();
+                const categoria = categorias.find((c) => c.id === form.categoria_id);
+                if (!categoria?.cafeteria_id) {
+                    throw new Error('La categoría seleccionada no tiene una cafetería asociada. Recarga la página y vuelve a intentarlo.');
+                }
+                const { data, error } = await supabase.from('productos')
+                    .insert({ ...datos, cafeteria_id: categoria.cafeteria_id })
+                    .select()
+                    .single();
                 if (error) throw error;
                 if (data) {
                     productoId = data.id;
@@ -362,10 +369,15 @@ export default function AdminProductosPage() {
             }
         } catch (err) {
             console.error('Error al guardar:', err);
-            alert('Error al guardar el producto. Revisa la consola.');
+            const mensaje = err && typeof err === 'object' && 'message' in err
+                ? String(err.message)
+                : 'Intenta nuevamente.';
+            alert(`Error al guardar el producto: ${mensaje}`);
+            return;
+        } finally {
+            setGuardando(false);
         }
 
-        setGuardando(false);
         setModalAbierto(false);
     };
 
